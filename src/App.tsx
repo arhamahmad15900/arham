@@ -9,6 +9,7 @@ import { StudentResultView } from './components/StudentResultView.tsx';
 import { HostExitConfirmModal } from './components/HostExitConfirmModal.tsx';
 import type { SessionPublicInfo, Question, QuestionStatus, ExamStatus } from './types.ts';
 import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle } from 'lucide-react';
+import { generateExamReportPDF } from './utils/pdfGenerator.ts';
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results'>('home');
@@ -68,6 +69,17 @@ export default function App() {
     setExitModalError('');
 
     try {
+      // Automatically download results PDF when closing session
+      try {
+        const resResults = await fetch(`/api/sessions/${targetSessionId}/results`);
+        const resultsData = await resResults.json();
+        if (resultsData && resultsData.results && resultsData.results.length > 0) {
+          generateExamReportPDF(resultsData);
+        }
+      } catch (pdfErr) {
+        console.error('Auto-download PDF error:', pdfErr);
+      }
+
       const res = await fetch(`/api/sessions/${targetSessionId}/host-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -225,7 +237,7 @@ export default function App() {
             <div className="font-bold text-gray-900 text-xs sm:text-sm md:text-base leading-tight truncate">
               Access Computer Education Center
             </div>
-            <div className="text-[10px] sm:text-[11px] text-gray-500 truncate">CBT Examination System</div>
+            <div className="text-[10px] sm:text-[11px] text-gray-500 truncate">CBT Examination System • Developed by Majid Ali</div>
           </div>
         </div>
 
@@ -239,17 +251,7 @@ export default function App() {
             <span className="hidden sm:inline">Home</span>
           </button>
 
-          <button
-            onClick={() => handleAttemptNavigation('create-exam')}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition flex items-center space-x-1 ${
-              currentMode === 'create-exam' || currentMode === 'manage-session'
-                ? 'bg-[#02529c] text-white shadow-xs'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            <MonitorCheck className="w-3.5 h-3.5" />
-            <span>Host Test</span>
-          </button>
+
 
           <button
             onClick={() => { setActiveSessionInfo(null); handleAttemptNavigation('join'); }}

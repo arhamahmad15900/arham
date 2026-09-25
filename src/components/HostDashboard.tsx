@@ -100,7 +100,8 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
   const fetchSessionData = async (sId: string = sessionId) => {
     try {
       const res = await fetch(`/api/sessions/${sId}/host-status`);
-      if (!res.ok) {
+      const contentType = res.headers.get('content-type');
+      if (!res.ok || !contentType || !contentType.includes('application/json')) {
         setLoading(false);
         return;
       }
@@ -177,6 +178,18 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
   const handleHostAction = async (action: string, payload?: any) => {
     setActionLoading(true);
     try {
+      if (action === 'close') {
+        try {
+          const resResults = await fetch(`/api/sessions/${sessionId}/results`);
+          const resultsData = await resResults.json();
+          if (resultsData && resultsData.results && resultsData.results.length > 0) {
+            generateExamReportPDF(resultsData);
+          }
+        } catch (pdfErr) {
+          console.error('Auto-download PDF error:', pdfErr);
+        }
+      }
+
       const res = await fetch(`/api/sessions/${sessionId}/host-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -480,15 +493,6 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                   <span>{copiedLink ? 'Link Copied!' : 'Copy Student Link'}</span>
                 </button>
 
-                {onNavigateToJoin && (
-                  <button
-                    onClick={() => onNavigateToJoin(sessionId)}
-                    className="bg-blue-50 hover:bg-blue-100 border border-blue-300 text-[#02529c] text-xs font-bold px-3 py-2 rounded flex items-center space-x-1 transition"
-                  >
-                    <span>Open Join View</span>
-                    <ExternalLink className="w-3.5 h-3.5 ml-1" />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -587,24 +591,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                   </button>
                 )}
 
-                {/* Results Publication Button */}
-                {session?.status === 'ended' && !session.resultsPublished && (
-                  <button
-                    onClick={() => handleHostAction('publish_results')}
-                    disabled={actionLoading}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded shadow-xs flex items-center space-x-1.5 transition ml-auto"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Publish Results to Candidates</span>
-                  </button>
-                )}
 
-                {session?.resultsPublished && (
-                  <span className="ml-auto bg-green-100 text-green-800 border border-green-300 font-bold text-xs px-3 py-2 rounded flex items-center space-x-1">
-                    <Check className="w-4 h-4 text-green-600" />
-                    <span>Results Published</span>
-                  </span>
-                )}
               </div>
             </div>
 
@@ -776,21 +763,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                   <span>Download Master PDF Report</span>
                 </button>
 
-                {!session?.resultsPublished ? (
-                  <button
-                    onClick={() => handleHostAction('publish_results')}
-                    disabled={actionLoading}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded shadow-xs flex items-center space-x-1.5 transition"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Publish Results to Candidates</span>
-                  </button>
-                ) : (
-                  <span className="bg-green-100 text-green-800 border border-green-300 font-bold text-xs px-3 py-2 rounded flex items-center space-x-1">
-                    <Check className="w-4 h-4 text-green-600" />
-                    <span>Results Are Published</span>
-                  </span>
-                )}
+
               </div>
             </div>
 

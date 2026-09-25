@@ -291,12 +291,12 @@ export const NIELIT_SAMPLE_QUESTIONS: Question[] = [
   },
   {
     id: 25,
-    text: "कंप्यूटर में किसी फ़ाइल को स्थायी रूप से (Permanently) डिलीट करने का शॉर्टकट क्या है?",
+    text: "Which is the correct way to create a comment on a single line in Python?",
     options: [
-      "A. Delete",
-      "B. Shift + Delete",
-      "C. Ctrl + Delete",
-      "D. Alt + Delete"
+      "A. // comment",
+      "B. # comment",
+      "C. /* comment */",
+      "D. <!-- comment -->"
     ],
     marks: 1,
     correctOption: 1

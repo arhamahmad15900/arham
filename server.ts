@@ -1159,8 +1159,19 @@ function sanitizeAIQuestions(
 
   for (let i = 0; i < rawQuestions.length; i++) {
     const item = rawQuestions[i];
-    const rawQuestionText = String(item.question || item.text || '').trim();
+    let rawQuestionText = String(item.question || item.text || '').trim();
     if (!rawQuestionText || rawQuestionText.length < 4) continue;
+
+    // Strip PDF artifacts from question text
+    const artifactPatterns = [
+      /--\s*\d+\s*of\s*\d+\s*--.*$/gi,
+      /O\s*Level\s*M[1-4]\s*[-—].*$/gi,
+      /Page\s+\d+\s*ANSWER\s*KEY.*$/gi,
+      /Check\s+your\s+answers\s+after\s+completing.*$/gi
+    ];
+    for (const pat of artifactPatterns) {
+      rawQuestionText = rawQuestionText.replace(pat, '').trim();
+    }
 
     // Semantic normalization for duplicate check
     const normalized = rawQuestionText.toLowerCase().replace(/[^\w\u0900-\u097F]/g, '');
@@ -1170,7 +1181,7 @@ function sanitizeAIQuestions(
     }
     seenStatements.add(normalized);
 
-    // Format options ensuring 4 distinct options with verbatim text preservation
+    // Format options ensuring 4 distinct options with strict artifact removal
     let rawOptions: string[] = Array.isArray(item.options) ? item.options : [];
     if (rawOptions.length < 2) {
       rawOptions = ['A. Option 1', 'B. Option 2', 'C. Option 3', 'D. Option 4'];
@@ -1179,9 +1190,22 @@ function sanitizeAIQuestions(
     const labels = ['A', 'B', 'C', 'D'];
     const formattedOptions = rawOptions.slice(0, 4).map((opt: string, optIdx: number) => {
       let optStr = String(opt || '').trim();
-      // Remove existing leading label if present (e.g. "A. ", "A) ", "(A) ")
-      const cleanText = optStr.replace(/^(\(?[A-Da-d1-4][\.\)]|\b[A-Da-d1-4][:.\s\-])\s*/, '').trim();
-      return `${labels[optIdx]}. ${cleanText || optStr}`;
+      // Remove existing leading label if present
+      let cleanText = optStr.replace(/^(\(?[A-Da-d1-4][\.\)]|\b[A-Da-d1-4][:.\s\-])\s*/, '').trim();
+
+      // Remove PDF artifacts from option text
+      for (const pat of artifactPatterns) {
+        cleanText = cleanText.replace(pat, '').trim();
+      }
+      cleanText = cleanText.replace(/--\s*\d+\s*of\s*\d+\s*--.*$/gi, '').trim();
+      cleanText = cleanText.replace(/Page\s+\d+.*$/gi, '').trim();
+
+      // Detect broken repeated characters like "B. B." or "A. A."
+      if (/^[A-Za-z]\.\s*[A-Za-z]\.?$/.test(cleanText) || /^([A-Za-z])\.\s*\1\.?$/i.test(cleanText)) {
+        cleanText = `Option ${labels[optIdx]}`;
+      }
+
+      return `${labels[optIdx]}. ${cleanText || `Option ${labels[optIdx]}`}`;
     });
 
     while (formattedOptions.length < 4) {

@@ -24,19 +24,13 @@ export const Homepage: React.FC<HomepageProps> = ({
             <div className="font-extrabold text-gray-900 text-base md:text-lg leading-tight tracking-tight">
               Access Computer Education Center
             </div>
-            <div className="text-xs text-blue-800 font-medium">Computer Based Test (CBT) Examination Portal</div>
+            <div className="text-xs text-blue-800 font-medium">Computer Based Test (CBT) Examination Portal • Developed by Majid Ali</div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-14 max-w-5xl mx-auto w-full">
-        {/* Welcome Tag */}
-        <div className="inline-flex items-center space-x-2 bg-blue-100/80 border border-blue-200 text-blue-900 px-3 py-1 rounded-full text-xs font-bold mb-4 shadow-2xs">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-          <span>AI-Powered Examination & Assessment Platform</span>
-        </div>
-
         {/* Hero Title */}
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 text-center tracking-tight leading-tight max-w-3xl mb-4">
           Online Computer-Based Testing System
@@ -150,11 +144,10 @@ export const Homepage: React.FC<HomepageProps> = ({
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-6 px-4 text-center text-xs text-gray-500">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© {new Date().getFullYear()} Access Computer Education Center. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Access Computer Education Center. Developed by Majid Ali. All rights reserved.</p>
           <div className="flex items-center space-x-4">
             <button onClick={onNavigateToHost} className="hover:text-blue-600 font-medium">Host Test</button>
             <button onClick={onNavigateToJoin} className="hover:text-blue-600 font-medium">Join Test</button>
-            <button onClick={onNavigateToResults} className="hover:text-blue-600 font-medium">Check Scorecard</button>
           </div>
         </div>
       </footer>
