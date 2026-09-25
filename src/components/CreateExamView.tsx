@@ -30,9 +30,9 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
   onBackToHome
 }) => {
   // Exam Configuration
-  const [testName, setTestName] = useState<string>('Access Computer Education Center — Online Test');
-  const [topic, setTopic] = useState<string>('NIELIT O Level & Computer Applications');
-  const [examinerName, setExaminerName] = useState<string>('Prof. R. K. Sharma');
+  const [testName, setTestName] = useState<string>('');
+  const [topic, setTopic] = useState<string>('');
+  const [examinerName, setExaminerName] = useState<string>('');
   const [durationMinutes, setDurationMinutes] = useState<number>(60);
   const [questionCount, setQuestionCount] = useState<number>(25);
   const [marksPerQuestion, setMarksPerQuestion] = useState<number>(1);

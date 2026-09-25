@@ -62,9 +62,9 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
   // New Exam Form State
-  const [newTestName, setNewTestName] = useState<string>('Access Computer Education Center — Online Test');
-  const [newTopic, setNewTopic] = useState<string>('NIELIT O Level & Computer Applications');
-  const [newExaminerName, setNewExaminerName] = useState<string>('Prof. R. K. Sharma');
+  const [newTestName, setNewTestName] = useState<string>('');
+  const [newTopic, setNewTopic] = useState<string>('');
+  const [newExaminerName, setNewExaminerName] = useState<string>('');
   const [newDuration, setNewDuration] = useState<number>(60);
   const [newQuestionCount, setNewQuestionCount] = useState<number>(25);
   const [newMarksPerQ, setNewMarksPerQ] = useState<number>(1);

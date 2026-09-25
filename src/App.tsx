@@ -13,7 +13,7 @@ import { generateExamReportPDF } from './utils/pdfGenerator.ts';
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results'>('home');
-  const [targetSessionId, setTargetSessionId] = useState<string>('ACE-2026');
+  const [targetSessionId, setTargetSessionId] = useState<string>('');
   
   // Host Session Management & Exit Guard States
   const [hostSessionStatus, setHostSessionStatus] = useState<ExamStatus | null>(null);
