@@ -1,0 +1,6 @@
+{
+  "name": "Access Computer Education Center - CBT Examination Platform",
+  "description": "Professional real-time Computer-Based Test (CBT) examination platform for Access Computer Education Center, featuring live host controls, bilingual question support, anti-cheating monitoring, and result publishing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
