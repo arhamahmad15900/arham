@@ -103,3 +103,5 @@ export interface SessionPublicInfo {
   broadcastNotice: BroadcastNotice | null;
   candidateCount: number;
 }
+
+export const CBT_TYPES_VERSION = '1.0.0';

@@ -7,7 +7,7 @@ import { StudentInstructions } from './components/StudentInstructions.tsx';
 import { CBTExamInterface } from './components/CBTExamInterface.tsx';
 import { StudentResultView } from './components/StudentResultView.tsx';
 import { HostExitConfirmModal } from './components/HostExitConfirmModal.tsx';
-import { SessionPublicInfo, Question, QuestionStatus, ExamStatus } from './types.ts';
+import type { SessionPublicInfo, Question, QuestionStatus, ExamStatus } from './types.ts';
 import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle } from 'lucide-react';
 
 export default function App() {

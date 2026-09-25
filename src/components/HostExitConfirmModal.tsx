@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, StopCircle, ArrowLeft, Loader2 } from 'lucide-react';
-import { ExamStatus } from '../types.ts';
+import type { ExamStatus } from '../types.ts';
 
 interface HostExitConfirmModalProps {
   isOpen: boolean;

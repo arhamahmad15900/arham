@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Question, QuestionStatus, BroadcastNotice } from '../types.ts';
+import type { Question, QuestionStatus, BroadcastNotice } from '../types.ts';
 import { AlertTriangle, Clock, CheckCircle2, XCircle, Bell, ShieldAlert, Award } from 'lucide-react';
 
 interface CBTExamInterfaceProps {

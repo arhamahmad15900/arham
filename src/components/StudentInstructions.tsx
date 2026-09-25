@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SessionPublicInfo, BroadcastNotice } from '../types.ts';
+import type { SessionPublicInfo, BroadcastNotice } from '../types.ts';
 import { Users, Clock, AlertCircle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 interface StudentInstructionsProps {

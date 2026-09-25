@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ExamSession, Question, CandidateState, AuditLogEntry, BroadcastNotice, ExamStatus } from '../types.ts';
+import type { ExamSession, Question, CandidateState, AuditLogEntry, BroadcastNotice, ExamStatus } from '../types.ts';
 import { generateQuestionSet, NIELIT_SAMPLE_QUESTIONS } from '../data/sampleQuestions.ts';
 import { generateExamReportPDF } from '../utils/pdfGenerator.ts';
 import { HostExitConfirmModal } from './HostExitConfirmModal.tsx';

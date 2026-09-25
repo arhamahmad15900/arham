@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SessionPublicInfo } from '../types.ts';
+import type { SessionPublicInfo } from '../types.ts';
 import { Search, AlertCircle, ArrowRight, ShieldCheck, CheckCircle } from 'lucide-react';
 
 interface JoinTestLookupProps {

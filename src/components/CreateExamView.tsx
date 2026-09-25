@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Question, GeneratedQuestion } from '../types.ts';
+import type { Question, GeneratedQuestion } from '../types.ts';
 import { NIELIT_SAMPLE_QUESTIONS, generateQuestionSet } from '../data/sampleQuestions.ts';
 import { 
   Upload, 

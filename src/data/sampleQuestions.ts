@@ -1,4 +1,4 @@
-import { Question } from '../types.ts';
+import type { Question } from '../types.ts';
 
 export const NIELIT_SAMPLE_QUESTIONS: Question[] = [
   {

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { PDFParse } from 'pdf-parse';
-import { ExamSession, Question, CandidateState, AuditLogEntry, QuestionStatus, GeneratedQuestion } from './src/types.ts';
+import type { ExamSession, Question, CandidateState, AuditLogEntry, QuestionStatus, GeneratedQuestion } from './src/types.ts';
 import { NIELIT_SAMPLE_QUESTIONS, generateQuestionSet } from './src/data/sampleQuestions.ts';
 
 dotenv.config();
