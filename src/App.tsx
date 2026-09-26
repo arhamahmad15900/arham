@@ -7,19 +7,18 @@ import { StudentInstructions } from './components/StudentInstructions.tsx';
 import { CBTExamInterface } from './components/CBTExamInterface.tsx';
 import { StudentResultView } from './components/StudentResultView.tsx';
 import { HostExitConfirmModal } from './components/HostExitConfirmModal.tsx';
-import { BugReportView } from './components/BugReportView.tsx';
 import type { SessionPublicInfo, Question, QuestionStatus, ExamStatus } from './types.ts';
-import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle, Bug } from 'lucide-react';
+import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle } from 'lucide-react';
 import { generateExamReportPDF } from './utils/pdfGenerator.ts';
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results' | 'bug-report'>('home');
+  const [currentMode, setCurrentMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results'>('home');
   const [targetSessionId, setTargetSessionId] = useState<string>('');
   
   // Host Session Management & Exit Guard States
   const [hostSessionStatus, setHostSessionStatus] = useState<ExamStatus | null>(null);
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
-  const [pendingNavigationMode, setPendingNavigationMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results' | 'bug-report' | null>(null);
+  const [pendingNavigationMode, setPendingNavigationMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results' | null>(null);
   const [isExitingSession, setIsExitingSession] = useState<boolean>(false);
   const [exitModalError, setExitModalError] = useState<string>('');
 
@@ -52,7 +51,7 @@ export default function App() {
   }, [currentMode, hostSessionStatus]);
 
   // Intercept Navigation to Display Exit Warning if Host Session is Active
-  const handleAttemptNavigation = (targetMode: 'home' | 'create-exam' | 'manage-session' | 'join' | 'results' | 'bug-report') => {
+  const handleAttemptNavigation = (targetMode: 'home' | 'create-exam' | 'manage-session' | 'join' | 'results') => {
     if (currentMode === 'manage-session' && hostSessionStatus && hostSessionStatus !== 'ended') {
       if (targetMode === 'manage-session') return; // already on host dashboard
       setPendingNavigationMode(targetMode);
@@ -138,8 +137,6 @@ export default function App() {
         setCurrentMode('join');
       } else if (modeParam === 'results') {
         setCurrentMode('results');
-      } else if (modeParam === 'bug-report' || modeParam === 'bug' || modeParam === 'report') {
-        setCurrentMode('bug-report');
       } else {
         // Default to Homepage at root URL "/"
         setCurrentMode('home');
@@ -214,7 +211,6 @@ export default function App() {
           onNavigateToHost={() => handleAttemptNavigation('create-exam')}
           onNavigateToJoin={() => { setActiveSessionInfo(null); handleAttemptNavigation('join'); }}
           onNavigateToResults={() => handleAttemptNavigation('results')}
-          onNavigateToBugReport={() => handleAttemptNavigation('bug-report')}
         />
         <HostExitConfirmModal
           isOpen={showExitModal}
@@ -249,15 +245,17 @@ export default function App() {
         <nav className="flex items-center space-x-1 sm:space-x-2 shrink-0">
           <button
             onClick={() => handleAttemptNavigation('home')}
-            className="px-2.5 py-1.5 rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-1 cursor-pointer"
+            className="px-2.5 py-1.5 rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-1"
           >
             <Home className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Home</span>
           </button>
 
+
+
           <button
             onClick={() => { setActiveSessionInfo(null); handleAttemptNavigation('join'); }}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition flex items-center space-x-1 cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-bold transition flex items-center space-x-1 ${
               currentMode === 'join'
                 ? 'bg-[#16A34A] text-white shadow-xs'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -265,18 +263,6 @@ export default function App() {
           >
             <GraduationCap className="w-3.5 h-3.5" />
             <span>Join Test</span>
-          </button>
-
-          <button
-            onClick={() => handleAttemptNavigation('bug-report')}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition flex items-center space-x-1 cursor-pointer ${
-              currentMode === 'bug-report'
-                ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-xs'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            <Bug className="w-3.5 h-3.5 text-amber-700" />
-            <span className="hidden sm:inline">Report Bug</span>
           </button>
         </nav>
       </header>
@@ -342,11 +328,6 @@ export default function App() {
         {/* Results Lookup */}
         {currentMode === 'results' && (
           <StudentResultView initialSessionId={targetSessionId} />
-        )}
-
-        {/* Bug Report View */}
-        {currentMode === 'bug-report' && (
-          <BugReportView onBackToHome={() => handleAttemptNavigation('home')} />
         )}
       </main>
 
