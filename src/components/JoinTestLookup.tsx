@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { SessionPublicInfo } from '../types.ts';
 import { Search, AlertCircle, ArrowRight, ShieldCheck, CheckCircle } from 'lucide-react';
+import { Logo } from './Logo.tsx';
 
 interface JoinTestLookupProps {
   initialSessionId?: string;
@@ -57,7 +58,8 @@ export const JoinTestLookup: React.FC<JoinTestLookupProps> = ({
     <div className="min-h-screen bg-[#f4f6f9] py-10 px-4 flex flex-col items-center justify-center font-sans">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         {/* Blue Header Banner */}
-        <div className="bg-[#02529c] text-white py-5 px-6 text-center">
+        <div className="bg-[#02529c] text-white py-5 px-6 text-center flex flex-col items-center">
+          <Logo size="md" className="mb-2" />
           <h1 className="text-lg md:text-xl font-bold tracking-wide">
             ACCESS COMPUTER EDUCATION CENTER
           </h1>

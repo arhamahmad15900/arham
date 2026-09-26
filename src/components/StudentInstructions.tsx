@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { SessionPublicInfo, BroadcastNotice } from '../types.ts';
 import { Users, Clock, AlertCircle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { StudentRemovedModal } from './StudentRemovedModal.tsx';
+import { Logo } from './Logo.tsx';
 
 interface StudentInstructionsProps {
   session: SessionPublicInfo;
@@ -125,9 +126,10 @@ export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         
         {/* Blue Header Banner matching Screenshot 3 */}
-        <div className="bg-[#02529c] text-white py-5 px-6 text-center">
+        <div className="bg-[#02529c] text-white py-5 px-6 text-center flex flex-col items-center">
+          <Logo size="md" className="mb-2" />
           <h1 className="text-xl md:text-2xl font-bold tracking-wide">
-            {session.testName || 'Access Computer Education Center — Online Practice Test'}
+            {session.testName || 'Access Computer Education Center: Online Practice Test'}
           </h1>
           <p className="text-xs md:text-sm text-blue-100 mt-1 font-medium tracking-wider">
             Computer Based Test (CBT)
@@ -157,7 +159,7 @@ export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
           {/* If Candidate has already submitted details and is waiting for Host */}
           {isJoined ? (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-              <div className="w-12 h-12 bg-blue-100 text-[#02529c] rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 bg-blue-100 text-[#02529c] rounded-xl flex items-center justify-center mx-auto mb-3">
                 <ShieldCheck className="w-7 h-7" />
               </div>
 

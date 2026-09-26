@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Award, CheckCircle, XCircle, Search, Clock, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Logo } from './Logo.tsx';
 
 export const StudentResultView: React.FC<{ initialSessionId?: string }> = ({ initialSessionId = '' }) => {
   const [sessionId, setSessionId] = useState(initialSessionId);
@@ -39,7 +40,8 @@ export const StudentResultView: React.FC<{ initialSessionId?: string }> = ({ ini
     <div className="min-h-screen bg-[#f4f6f9] py-8 px-4 flex flex-col items-center">
       <div className="max-w-2xl w-full">
         {/* Header */}
-        <div className="bg-[#02529c] text-white rounded-t-lg p-5 text-center shadow-xs">
+        <div className="bg-[#02529c] text-white rounded-t-lg p-5 text-center shadow-xs flex flex-col items-center">
+          <Logo size="md" className="mb-2" />
           <h1 className="text-xl font-bold tracking-wide">ACCESS COMPUTER EDUCATION CENTER</h1>
           <p className="text-xs text-blue-100 uppercase tracking-wider mt-1">Official Student Examination Scorecard</p>
         </div>
@@ -102,11 +104,11 @@ export const StudentResultView: React.FC<{ initialSessionId?: string }> = ({ ini
 
               <div className="text-xs">
                 {resultData.percentage >= 50 ? (
-                  <span className="bg-green-100 text-green-800 font-bold px-2.5 py-1 rounded-full border border-green-300">
+                  <span className="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-md border border-green-300">
                     PASSED
                   </span>
                 ) : (
-                  <span className="bg-red-100 text-red-800 font-bold px-2.5 py-1 rounded-full border border-red-300">
+                  <span className="bg-red-100 text-red-800 font-bold px-3 py-1 rounded-md border border-red-300">
                     FAILED
                   </span>
                 )}
@@ -226,8 +228,8 @@ export const StudentResultView: React.FC<{ initialSessionId?: string }> = ({ ini
                               }`}
                             >
                               <span>{opt}</span>
-                              {isCorrectAns && <span className="text-[10px] text-green-800 font-bold">✓ Correct Answer</span>}
-                              {isStudentSelected && !isCorrectAns && <span className="text-[10px] text-red-800 font-bold">✗ Your Choice</span>}
+                              {isCorrectAns && <span className="text-[10px] text-green-800 font-bold">Correct Answer</span>}
+                              {isStudentSelected && !isCorrectAns && <span className="text-[10px] text-red-800 font-bold">Your Choice</span>}
                             </div>
                           );
                         })}

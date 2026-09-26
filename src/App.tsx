@@ -7,6 +7,7 @@ import { StudentInstructions } from './components/StudentInstructions.tsx';
 import { CBTExamInterface } from './components/CBTExamInterface.tsx';
 import { StudentResultView } from './components/StudentResultView.tsx';
 import { HostExitConfirmModal } from './components/HostExitConfirmModal.tsx';
+import { Logo } from './components/Logo.tsx';
 import type { SessionPublicInfo, Question, QuestionStatus, ExamStatus } from './types.ts';
 import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle } from 'lucide-react';
 import { generateExamReportPDF } from './utils/pdfGenerator.ts';
@@ -234,33 +235,31 @@ export default function App() {
     <div className="min-h-screen bg-[#f4f7fb] flex flex-col font-sans select-none">
       {/* Top Global Portal Navbar (when outside of Homepage & Live Exam) */}
       <header className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-8 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs gap-2">
-        <div className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer overflow-hidden shrink" onClick={() => handleAttemptNavigation('home')}>
-          <div className="w-8 h-8 rounded bg-[#02529c] text-white font-black flex items-center justify-center text-sm shadow-xs shrink-0">
-            ACE
-          </div>
-          <div className="truncate">
-            <div className="font-bold text-gray-900 text-xs sm:text-sm md:text-base leading-tight truncate">
+        <div className="flex items-center space-x-2.5 sm:space-x-3.5 cursor-pointer min-w-0" onClick={() => handleAttemptNavigation('home')}>
+          <Logo size="md" className="shrink-0" />
+          <div className="min-w-0">
+            <div className="font-extrabold text-gray-900 text-xs sm:text-sm md:text-base leading-tight tracking-tight truncate sm:whitespace-normal">
               Access Computer Education Center
             </div>
-            <div className="text-[10px] sm:text-[11px] text-gray-500 truncate">CBT Examination System • Developed by Majid Ali</div>
+            <div className="text-[10px] sm:text-xs text-blue-900/80 font-medium leading-tight truncate sm:whitespace-normal mt-0.5">
+              Computer Based Test (CBT) Examination Portal
+            </div>
           </div>
         </div>
 
-        {/* Simplified Navigation */}
+        {/* Simplified Navigation & Actions */}
         <nav className="flex items-center space-x-1 sm:space-x-2 shrink-0">
           <button
             onClick={() => handleAttemptNavigation('home')}
-            className="px-2.5 py-1.5 rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-1"
+            className="px-2 sm:px-2.5 py-1.5 rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-1 cursor-pointer"
           >
             <Home className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Home</span>
           </button>
 
-
-
           <button
             onClick={() => { setActiveSessionInfo(null); handleAttemptNavigation('join'); }}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition flex items-center space-x-1 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center space-x-1 cursor-pointer ${
               currentMode === 'join'
                 ? 'bg-[#16A34A] text-white shadow-xs'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'

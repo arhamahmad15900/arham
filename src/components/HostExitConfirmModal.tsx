@@ -36,7 +36,7 @@ export const HostExitConfirmModal: React.FC<HostExitConfirmModalProps> = ({
       >
         {/* Header with Warning Icon */}
         <div className="flex items-start space-x-3 mb-4">
-          <div className={`p-2.5 rounded-full shrink-0 ${isLive ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+          <div className={`p-2.5 rounded-xl shrink-0 ${isLive ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
@@ -77,8 +77,9 @@ export const HostExitConfirmModal: React.FC<HostExitConfirmModalProps> = ({
           )}
 
           {errorMessage && (
-            <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-red-900 text-xs font-semibold">
-              ⚠️ {errorMessage}
+            <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-red-900 text-xs font-semibold flex items-center">
+              <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mr-1.5" />
+              <span>{errorMessage}</span>
             </div>
           )}
         </div>
@@ -92,7 +93,7 @@ export const HostExitConfirmModal: React.FC<HostExitConfirmModalProps> = ({
             className="w-full sm:w-auto px-5 py-2.5 bg-[#02529c] hover:bg-blue-800 text-white font-bold text-xs md:text-sm rounded-lg transition shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-50"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>No — Stay on Page</span>
+            <span>Stay on Page</span>
           </button>
 
           <button
@@ -109,7 +110,7 @@ export const HostExitConfirmModal: React.FC<HostExitConfirmModalProps> = ({
             ) : (
               <>
                 <StopCircle className="w-4 h-4" />
-                <span>Yes — Close Session & Leave</span>
+                <span>Close Session and Leave</span>
               </>
             )}
           </button>

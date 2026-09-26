@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Question, QuestionStatus, BroadcastNotice } from '../types.ts';
-import { AlertTriangle, Clock, CheckCircle2, XCircle, Bell, ShieldAlert, Award } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, XCircle, Bell, ShieldAlert, Award, X } from 'lucide-react';
 import { StudentRemovedModal } from './StudentRemovedModal.tsx';
+import { Logo } from './Logo.tsx';
 
 interface CBTExamInterfaceProps {
   sessionId: string;
@@ -429,7 +430,7 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
           </div>
 
           <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+            <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 text-green-600">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
@@ -481,10 +482,11 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col select-none">
       {/* 2.1 Blue Examination Header (Full-width deep blue, white title, countdown timer on right) */}
-      <header className="bg-[#02529c] text-white px-4 md:px-6 py-2.5 flex items-center justify-between shadow-md shrink-0 border-b border-blue-900 sticky top-0 z-20">
-        <div className="flex items-center space-x-3 overflow-hidden">
-          <div className="font-bold text-sm md:text-base tracking-wide truncate">
-            {testTitle || 'Access Computer Education Center — Online Test'}
+      <header className="bg-[#02529c] text-white px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 flex items-center justify-between shadow-md shrink-0 border-b border-blue-900 sticky top-0 z-20 gap-2">
+        <div className="flex items-center space-x-2.5 sm:space-x-3 overflow-hidden min-w-0">
+          <Logo size="xs" className="shrink-0" />
+          <div className="font-bold text-xs sm:text-sm md:text-base tracking-wide truncate">
+            {testTitle || 'Access Computer Education Center: Online Test'}
           </div>
         </div>
 
@@ -507,7 +509,7 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
 
       {/* Broadcast Notice Bar if Examiner sent an announcement */}
       {broadcastNotice && (
-        <div className="bg-amber-100 border-b border-amber-300 px-4 py-2 text-amber-900 text-sm flex items-center justify-between shrink-0 animate-pulse">
+        <div className="bg-amber-100 border-b border-amber-300 px-4 py-2 text-amber-900 text-sm flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2">
             <Bell className="w-4 h-4 text-amber-700 shrink-0" />
             <span><strong>Notice from Host ({broadcastNotice.examiner}):</strong> {broadcastNotice.message}</span>
@@ -525,7 +527,7 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
       {examStatus === 'paused' && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white rounded-lg p-6 max-w-md w-full text-center shadow-xl border border-gray-200">
-            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center mx-auto mb-3">
               <Clock className="w-7 h-7" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">Examination Paused by Host</h3>
@@ -542,8 +544,8 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
       {/* Tab Switch Warning Modal */}
       {showTabWarning && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl border-2 border-red-500 text-center animate-bounce-short">
-            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl border-2 border-red-500 text-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mx-auto mb-3">
               <ShieldAlert className="w-7 h-7" />
             </div>
             <h3 className="text-lg font-bold text-red-700 mb-2">Anti-Cheating Warning</h3>
@@ -723,9 +725,10 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
             <span>QUESTION PALETTE</span>
             <button
               onClick={() => setShowMobilePalette(false)}
-              className="bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded text-xs"
+              className="bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded text-xs flex items-center"
             >
-              ✕ Close
+              <X className="w-3.5 h-3.5 mr-1" />
+              <span>Close</span>
             </button>
           </div>
 

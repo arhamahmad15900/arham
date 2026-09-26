@@ -407,7 +407,7 @@ function seedInitialSession() {
   const questions = generateQuestionSet(25);
   const sampleSession = {
     id: initialSessionId,
-    testName: "Access Computer Education Center \u2014 Online Test",
+    testName: "Access Computer Education Center: Online Test",
     topic: "NIELIT O Level & Computer Concepts (M1-R5)",
     examinerName: "Prof. R. K. Sharma",
     durationMinutes: 60,
@@ -554,7 +554,7 @@ app.post("/api/sessions/create", (req, res) => {
     ];
     const newSession = {
       id: sessionId,
-      testName: testName?.trim() || "Access Computer Education Center \u2014 Online Test",
+      testName: testName?.trim() || "Access Computer Education Center: Online Test",
       topic: topic?.trim() || "Computer Based Examination",
       examinerName: examinerName?.trim() || "Examiner",
       durationMinutes: parsedDuration,
@@ -1654,7 +1654,7 @@ ${chunkText}` }]
           isComplete: true
         },
         data: {
-          testTitle: reqTitle || "Access Computer Education Center \u2014 Online Test",
+          testTitle: reqTitle || "Access Computer Education Center: Online Test",
           topic: topic || "Computer Applications",
           language: "Bilingual / English",
           questions: sanitizedList
@@ -1668,7 +1668,7 @@ ${chunkText}` }]
       note: "Loaded verified NIELIT question bank.",
       totalDetected: defaultQuestions.length,
       data: {
-        testTitle: "Access Computer Education Center \u2014 NIELIT O Level Test",
+        testTitle: "Access Computer Education Center: NIELIT O Level Test",
         topic: "M1-R5 IT Tools & Network Basics",
         questions: defaultQuestions.map((q) => ({
           ...q,
@@ -1738,6 +1738,7 @@ data: ${JSON.stringify({
     sseClients.get(sessionId)?.delete(clientObj);
   });
 });
+app.use(express.static(path.resolve(__dirname, "public")));
 async function startServer() {
   if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.resolve(__dirname, "dist")));

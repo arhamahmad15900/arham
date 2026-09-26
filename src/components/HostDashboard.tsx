@@ -3,6 +3,7 @@ import type { ExamSession, Question, CandidateState, AuditLogEntry, BroadcastNot
 import { generateQuestionSet, NIELIT_SAMPLE_QUESTIONS } from '../data/sampleQuestions.ts';
 import { generateExamReportPDF } from '../utils/pdfGenerator.ts';
 import { HostExitConfirmModal } from './HostExitConfirmModal.tsx';
+import { Logo } from './Logo.tsx';
 import { 
   Play, 
   Pause, 
@@ -373,12 +374,10 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col font-sans">
       {/* Top Navigation Bar */}
-      <header className="bg-[#02529c] text-white px-3 sm:px-4 md:px-8 py-2.5 sm:py-3 flex flex-wrap sm:flex-nowrap items-center justify-between shadow-md border-b border-blue-900 sticky top-0 z-20 gap-2">
-        <div className="flex items-center space-x-2.5 sm:space-x-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-white text-[#02529c] font-black flex items-center justify-center text-sm sm:text-base shadow-xs shrink-0">
-            ACE
-          </div>
-          <div>
+      <header className="bg-[#02529c] text-white px-3 sm:px-4 md:px-8 py-2 sm:py-2.5 flex flex-wrap sm:flex-nowrap items-center justify-between shadow-md border-b border-blue-900 sticky top-0 z-20 gap-2">
+        <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+          <Logo size="sm" className="shrink-0" />
+          <div className="min-w-0">
             <h1 className="font-bold text-xs sm:text-sm md:text-base tracking-wide leading-tight truncate max-w-[200px] sm:max-w-none">
               Access Computer Education Center
             </h1>
@@ -473,7 +472,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                   </button>
                 </div>
                 <h2 className="text-base md:text-lg font-bold text-gray-900">
-                  {session?.testName || 'Access Computer Education Center — Online Test'}
+                  {session?.testName || 'Access Computer Education Center: Online Test'}
                 </h2>
                 <p className="text-xs text-gray-600">
                   Topic: <strong>{session?.topic}</strong> | Examiner: <strong>{session?.examinerName}</strong> | Total Qs: <strong>{session?.totalQuestions}</strong>
@@ -484,9 +483,9 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center space-x-2">
                   <span className="text-xs text-gray-500 font-semibold">Status:</span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                  <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
                     session?.status === 'live'
-                      ? 'bg-green-100 text-green-800 border border-green-300 animate-pulse'
+                      ? 'bg-green-100 text-green-800 border border-green-300'
                       : session?.status === 'starting'
                       ? 'bg-amber-100 text-amber-800 border border-amber-300'
                       : session?.status === 'paused'
@@ -587,7 +586,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                 {/* 6.4 Broadcast Notice */}
                 <button
                   onClick={() => setShowBroadcastModal(true)}
-                  className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold px-4 py-2.5 rounded shadow-xs flex items-center space-x-1.5 transition"
+                  className="bg-[#02529c] hover:bg-blue-800 text-white text-xs font-bold px-4 py-2.5 rounded shadow-xs flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   <span>Broadcast Notice</span>
@@ -764,7 +763,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                           : log.type === 'start' || log.type === 'resume'
                           ? 'bg-green-50 border-green-200 text-green-900'
                           : log.type === 'broadcast'
-                          ? 'bg-purple-50 border-purple-200 text-purple-900'
+                          ? 'bg-blue-50 border-blue-200 text-blue-900 font-medium'
                           : 'bg-gray-50 border-gray-200 text-gray-700'
                       }`}
                     >
@@ -878,7 +877,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-5 shadow-xl border border-gray-200">
             <h3 className="text-sm font-bold text-gray-900 mb-2 flex items-center space-x-1.5">
-              <Send className="w-4 h-4 text-purple-700" />
+              <Send className="w-4 h-4 text-[#02529c]" />
               <span>Broadcast Notice to All Students</span>
             </h3>
             <p className="text-xs text-gray-600 mb-3">
@@ -889,20 +888,20 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
               value={broadcastMessage}
               onChange={(e) => setBroadcastMessage(e.target.value)}
               placeholder="e.g. You have 15 minutes remaining. Please review your answers."
-              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+              className="w-full p-2.5 text-xs bg-white border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             />
             <div className="mt-4 flex justify-end space-x-2">
               <button
                 type="button"
                 onClick={() => setShowBroadcastModal(false)}
-                className="px-3 py-1.5 border border-gray-300 text-xs font-semibold rounded text-gray-700 hover:bg-gray-100"
+                className="px-3 py-1.5 border border-gray-300 text-xs font-semibold rounded text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSendBroadcast}
-                className="px-4 py-1.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded shadow-xs"
+                className="px-4 py-1.5 bg-[#02529c] hover:bg-blue-800 text-white text-xs font-bold rounded shadow-xs cursor-pointer"
               >
                 Send Notice
               </button>
@@ -934,7 +933,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
             aria-labelledby="remove-modal-title"
           >
             <div className="flex items-start space-x-3 mb-4">
-              <div className="p-2.5 rounded-full bg-red-100 text-red-600 shrink-0">
+              <div className="p-2.5 rounded-xl bg-red-100 text-red-600 shrink-0">
                 <UserX className="w-6 h-6" />
               </div>
               <div>

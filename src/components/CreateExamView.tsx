@@ -149,7 +149,7 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
       if (json.data?.topic) setTopic(json.data.topic);
 
       setGenerationSuccessInfo(
-        `✓ All ${formatted.length} Questions Extracted from PDF with 100% Options Intact. Every question will load in a neutral unselected state for students.`
+        `All ${formatted.length} questions extracted from PDF with all options intact. Every question will load in a neutral unselected state for students.`
       );
       setGenerationStep('Ready for Review');
     } catch (err: any) {
@@ -171,7 +171,7 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
     }));
 
     setQuestions(preset);
-    setTestName('Access Computer Education Center — NIELIT O Level Test');
+    setTestName('Access Computer Education Center: NIELIT O Level Test');
     setTopic('M1-R5 IT Tools & Network Basics');
     setGenerationSuccessInfo(`Loaded ${preset.length} verified bilingual questions from NIELIT question bank.`);
     setGenerationError('');
@@ -378,13 +378,13 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
           </div>
         </div>
 
-        {/* 2. PDF Upload & OpenRouter AI Generator Card */}
+        {/* 2. PDF Upload & Question Extraction Card */}
         <div className="bg-white rounded-xl border border-gray-300 shadow-xs p-5 md:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-gray-200 gap-2">
             <div>
               <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center space-x-2">
-                <Sparkles className="w-4 h-4 text-purple-600" />
-                <span>2. Upload Question Paper (PDF) & AI Generation</span>
+                <FileText className="w-4 h-4 text-[#02529c]" />
+                <span>2. Upload Question Paper (PDF) & Extraction</span>
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">
                 Upload any PDF containing MCQs or study materials. Supports Hindi and English questions.
@@ -422,7 +422,7 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
                 onChange={handleFileChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2">
+              <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2">
                 <Upload className="w-6 h-6" />
               </div>
               <span className="text-xs font-bold text-gray-800 mb-0.5">
@@ -440,10 +440,10 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
               type="button"
               onClick={handleGenerateTestWithAI}
               disabled={isGenerating}
-              className="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition disabled:opacity-50"
+              className="bg-[#02529c] hover:bg-blue-800 text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-xs flex items-center space-x-2 transition disabled:opacity-50 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>{isGenerating ? generationStep : 'Generate Test with AI'}</span>
+              <Cpu className="w-4 h-4" />
+              <span>{isGenerating ? generationStep : 'Extract Questions with AI'}</span>
             </button>
           </div>
         </div>
@@ -521,7 +521,7 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
                             ? 'bg-green-100 text-green-800'
                             : 'bg-amber-100 text-amber-800'
                         }`}>
-                          {q.answerStatus === 'verified' ? '✓ Verified Answer' : '⚡ AI Proposed'}
+                          {q.answerStatus === 'verified' ? 'Verified Answer' : 'AI Proposed'}
                         </span>
                       </div>
 
@@ -595,7 +595,7 @@ export const CreateExamView: React.FC<CreateExamViewProps> = ({
                                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                               }`}
                             >
-                              {isCorrect ? '✓ Correct' : 'Set Correct'}
+                              {isCorrect ? 'Correct' : 'Set Correct'}
                             </button>
                           </div>
                         );

@@ -26,7 +26,7 @@ export const StudentRemovedModal: React.FC<StudentRemovedModalProps> = ({
         aria-modal="true"
         aria-labelledby="removal-modal-title"
       >
-        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-200 shadow-xs">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-4 border border-red-200 shadow-xs">
           <UserX className="w-9 h-9" />
         </div>
 
