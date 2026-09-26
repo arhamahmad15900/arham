@@ -147,6 +147,14 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
       fetchSessionData(sessionId);
     });
 
+    sse.addEventListener('candidate_left', () => {
+      fetchSessionData(sessionId);
+    });
+
+    sse.addEventListener('candidate_removed', () => {
+      fetchSessionData(sessionId);
+    });
+
     sse.addEventListener('candidate_progress', () => {
       fetchSessionData(sessionId);
     });
@@ -351,10 +359,17 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  const totalCandidates = candidates.length;
+  const totalCandidates = candidates.filter(c => c.connected && c.connectionStatus !== 'left' && c.connectionStatus !== 'removed').length;
   const submittedCandidates = candidates.filter(c => c.submitted).length;
   const activeCandidates = candidates.filter(c => !c.submitted && c.connected).length;
   const totalWarnings = candidates.reduce((acc, c) => acc + (c.warningCount || 0), 0);
+
+  const handleRemoveCandidate = async (rollNo: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to remove ${name} (Roll No. ${rollNo}) from this examination session?`)) {
+      return;
+    }
+    await handleHostAction('remove_candidate', { rollNo });
+  };
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col font-sans">
@@ -646,51 +661,77 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
                   <table className="w-full text-left text-xs text-gray-800">
                     <thead className="bg-gray-100 text-gray-600 uppercase font-semibold text-[11px] sticky top-0">
                       <tr>
-                        <th className="py-2.5 px-3">Roll No</th>
                         <th className="py-2.5 px-3">Candidate Name</th>
-                        <th className="py-2.5 px-3">Progress</th>
-                        <th className="py-2.5 px-3">Status</th>
-                        <th className="py-2.5 px-3">Warnings</th>
-                        <th className="py-2.5 px-3">Last Ping</th>
+                        <th className="py-2.5 px-3">Roll Number</th>
+                        <th className="py-2.5 px-3">Connection Status</th>
+                        <th className="py-2.5 px-3">Submission Status</th>
+                        <th className="py-2.5 px-3">Warning Count</th>
+                        <th className="py-2.5 px-3">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {candidates.length > 0 ? (
-                        candidates.map((c) => (
-                          <tr key={c.rollNo} className="hover:bg-gray-50">
-                            <td className="py-2 px-3 font-mono font-bold text-blue-900">{c.rollNo}</td>
-                            <td className="py-2 px-3 font-medium">{c.name}</td>
-                            <td className="py-2 px-3">
-                              <span className="font-semibold text-gray-800">
-                                {Object.keys(c.answers || {}).length} / {session?.totalQuestions || 25}
-                              </span>
-                            </td>
-                            <td className="py-2 px-3">
-                              {c.submitted ? (
-                                <span className="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded">
-                                  Submitted
-                                </span>
-                              ) : (
-                                <span className="flex items-center space-x-1 text-emerald-600 font-semibold">
-                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                                  <span>Testing</span>
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3">
-                              {c.warningCount > 0 ? (
-                                <span className="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[11px]">
-                                  {c.warningCount} Alerts
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">0</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-gray-500 text-[11px]">
-                              {c.lastActive ? new Date(c.lastActive).toLocaleTimeString() : 'N/A'}
-                            </td>
-                          </tr>
-                        ))
+                        candidates.map((c) => {
+                          const connStatus = c.connectionStatus || (c.connected ? 'joined' : 'disconnected');
+                          const subStatus = c.submitted
+                            ? (c.submissionType === 'auto_timeout' || c.submissionType === 'host_close' ? 'Auto-Submitted' : 'Submitted')
+                            : (Object.keys(c.answers || {}).length > 0 ? 'In Progress' : 'Not Started');
+
+                          return (
+                            <tr key={c.rollNo} className="hover:bg-gray-50">
+                              <td className="py-2 px-3 font-medium">{c.name}</td>
+                              <td className="py-2 px-3 font-mono font-bold text-blue-900">{c.rollNo}</td>
+                              <td className="py-2 px-3">
+                                {connStatus === 'joined' && (
+                                  <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Joined</span>
+                                )}
+                                {connStatus === 'disconnected' && (
+                                  <span className="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Disconnected</span>
+                                )}
+                                {connStatus === 'left' && (
+                                  <span className="bg-gray-200 text-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">Left</span>
+                                )}
+                                {connStatus === 'removed' && (
+                                  <span className="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">Removed</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3">
+                                {subStatus === 'Submitted' && (
+                                  <span className="bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded text-[10px]">Submitted</span>
+                                )}
+                                {subStatus === 'Auto-Submitted' && (
+                                  <span className="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Auto-Submitted</span>
+                                )}
+                                {subStatus === 'In Progress' && (
+                                  <span className="text-emerald-600 font-semibold text-[11px]">In Progress</span>
+                                )}
+                                {subStatus === 'Not Started' && (
+                                  <span className="text-gray-500 text-[11px]">Not Started</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3">
+                                {c.warningCount > 0 ? (
+                                  <span className="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[11px]">
+                                    {c.warningCount} Alerts
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">0</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3">
+                                {connStatus !== 'left' && connStatus !== 'removed' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveCandidate(c.rollNo, c.name)}
+                                    className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1 rounded transition shadow-xs cursor-pointer"
+                                  >
+                                    Remove
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
                           <td colSpan={6} className="py-8 text-center text-gray-500">

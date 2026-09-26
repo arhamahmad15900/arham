@@ -541,9 +541,9 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
       )}
 
       {/* 2.2 Main Examination Layout: Left Question Panel, Right Question Palette */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-3 md:p-4 gap-3 md:gap-4 max-w-[1920px] mx-auto w-full">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto p-3 md:p-4 gap-3 md:gap-4 max-w-[1920px] mx-auto w-full">
         {/* Left Column: Question Panel */}
-        <main className="flex-1 flex flex-col bg-white rounded border border-gray-300 shadow-xs overflow-hidden">
+        <main className="flex-1 flex flex-col bg-white rounded border border-gray-300 shadow-xs overflow-hidden mb-4 lg:mb-0">
           {currentQuestion ? (
             <>
               {/* 2.3 Question Header Strip */}
@@ -625,6 +625,64 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
                   Save & Next
                 </button>
               </div>
+
+              {/* Mobile Vertical Question Palette & Legend & Submit (Visible on mobile/tablet below lg) */}
+              <div className="block lg:hidden border-t border-gray-300 p-4 bg-gray-50 space-y-4">
+                <div className="p-3 bg-white border border-gray-200 rounded text-xs text-gray-800 space-y-1">
+                  <div className="flex">
+                    <span className="font-semibold text-gray-600 w-24">Candidate:</span>
+                    <span className="font-bold text-gray-900 truncate">{candidateName}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold text-gray-600 w-24">Roll No:</span>
+                    <span className="font-bold text-gray-900">{rollNo}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Question Palette</h3>
+                  <div className="grid grid-cols-5 sm:grid-cols-8 gap-1.5 p-2 bg-white border border-gray-200 rounded max-h-48 overflow-y-auto">
+                    {questions.map((q, idx) => (
+                      <button
+                        key={q.id}
+                        type="button"
+                        onClick={() => handleJumpToQuestion(idx)}
+                        className={getPaletteButtonClass(idx)}
+                        title={`Question ${idx + 1}`}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 border border-gray-200 bg-white rounded text-[11px] text-gray-700 space-y-1.5">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-3.5 h-3.5 bg-[#e9ecef] border border-gray-300 inline-block rounded-xs" />
+                    <span>Not Visited</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-3.5 h-3.5 bg-[#28a745] inline-block rounded-xs" />
+                    <span>Answered</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-3.5 h-3.5 bg-[#dc3545] inline-block rounded-xs" />
+                    <span>Not Answered</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-3.5 h-3.5 bg-[#6f42c1] inline-block rounded-xs" />
+                    <span>Marked for Review</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowSubmitModal(true)}
+                  className="w-full bg-[#b02a37] hover:bg-[#8f212d] text-white font-bold py-3 px-4 rounded text-sm uppercase tracking-wider transition shadow-sm"
+                >
+                  SUBMIT TEST
+                </button>
+              </div>
             </>
           ) : (
             <div className="p-8 text-center text-gray-500">
@@ -633,21 +691,9 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
           )}
         </main>
 
-        {/* Mobile Palette Backdrop */}
-        {showMobilePalette && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-35 md:hidden backdrop-blur-xs"
-            onClick={() => setShowMobilePalette(false)}
-          />
-        )}
-
-        {/* Right Column: Question Palette Sidebar */}
+        {/* Right Column: Question Palette Sidebar (Desktop only: lg:flex) */}
         <aside
-          className={`w-full md:w-80 lg:w-96 bg-white rounded border border-gray-300 shadow-lg md:shadow-xs flex flex-col shrink-0 overflow-hidden ${
-            showMobilePalette 
-              ? 'fixed inset-x-3 bottom-3 top-14 z-40 md:static rounded-xl' 
-              : 'hidden md:flex'
-          }`}
+          className="hidden lg:flex w-96 bg-white rounded border border-gray-300 shadow-xs flex-col shrink-0 overflow-hidden"
         >
           {/* Mobile Close Bar */}
           <div className="md:hidden bg-[#02529c] text-white px-3 py-2 flex items-center justify-between text-xs font-bold shrink-0">

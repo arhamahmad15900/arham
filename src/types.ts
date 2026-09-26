@@ -43,6 +43,7 @@ export interface CandidateState {
   name: string;
   rollNo: string;
   connected: boolean;
+  connectionStatus?: 'joined' | 'disconnected' | 'left' | 'removed';
   lastActive: number;
   warningCount: number;
   warnings: { timestamp: number; reason: string }[];

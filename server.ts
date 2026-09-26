@@ -7,6 +7,7 @@ import { GoogleGenAI } from '@google/genai';
 import { PDFParse } from 'pdf-parse';
 import type { ExamSession, Question, CandidateState, AuditLogEntry, QuestionStatus, GeneratedQuestion } from './src/types.ts';
 import { NIELIT_SAMPLE_QUESTIONS, generateQuestionSet } from './src/data/sampleQuestions.ts';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -29,6 +30,268 @@ app.get(['/health', '/api/health'], (req: Request, res: Response) => {
   });
 });
 
+// Rate Limiter for Bug Reports: max 5 requests per 10 minutes per IP
+const bugReportRateLimit = new Map<string, { count: number; firstRequestTime: number }>();
+
+// Bug Report Endpoint: Sends report + screenshot attachments directly to arhamahmad15900@gmail.com
+app.post('/api/bug-report', async (req: Request, res: Response) => {
+  try {
+    // 1. Rate Limiting Check
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.ip || req.socket.remoteAddress || 'unknown-ip';
+    const now = Date.now();
+    const windowMs = 10 * 60 * 1000; // 10 minutes
+    const maxRequests = 5;
+
+    const rateData = bugReportRateLimit.get(clientIp);
+    if (rateData) {
+      if (now - rateData.firstRequestTime < windowMs) {
+        if (rateData.count >= maxRequests) {
+          return res.status(429).json({
+            error: 'Too many bug reports submitted from your IP address. Please wait a few minutes before submitting again.'
+          });
+        }
+        rateData.count += 1;
+      } else {
+        bugReportRateLimit.set(clientIp, { count: 1, firstRequestTime: now });
+      }
+    } else {
+      bugReportRateLimit.set(clientIp, { count: 1, firstRequestTime: now });
+    }
+
+    // 2. Validate Body Fields
+    const { name, email, category, title, description, stepsToReproduce, attachments } = req.body;
+
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ error: 'Bug Title is required.' });
+    }
+
+    if (!description || typeof description !== 'string' || !description.trim()) {
+      return res.status(400).json({ error: 'Detailed Description is required.' });
+    }
+
+    if (!category || typeof category !== 'string') {
+      return res.status(400).json({ error: 'Issue Category is required.' });
+    }
+
+    if (email && typeof email === 'string' && email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        return res.status(400).json({ error: 'Invalid email address format.' });
+      }
+    }
+
+    // 3. Process & Validate Attachments
+    const validatedAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
+    const MAX_ATTACHMENTS = 3;
+    const MAX_SINGLE_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+
+    if (Array.isArray(attachments)) {
+      if (attachments.length > MAX_ATTACHMENTS) {
+        return res.status(400).json({ error: `Maximum ${MAX_ATTACHMENTS} image attachments permitted.` });
+      }
+
+      for (let i = 0; i < attachments.length; i++) {
+        const att = attachments[i];
+        if (!att || !att.data || typeof att.data !== 'string') continue;
+
+        const contentType = String(att.contentType || 'image/png').toLowerCase();
+        if (!ALLOWED_MIME_TYPES.includes(contentType)) {
+          return res.status(400).json({ error: `File ${i + 1} has an unsupported format. Please upload PNG, JPG, or WEBP.` });
+        }
+
+        const buffer = Buffer.from(att.data, 'base64');
+        if (buffer.length > MAX_SINGLE_FILE_SIZE) {
+          return res.status(400).json({ error: `Attachment ${att.filename || (i + 1)} exceeds the 5MB size limit.` });
+        }
+
+        const safeFilename = String(att.filename || `screenshot_${i + 1}.png`).replace(/[^a-zA-Z0-9_.-]/g, '_');
+
+        validatedAttachments.push({
+          filename: safeFilename,
+          content: buffer,
+          contentType
+        });
+      }
+    }
+
+    // 4. Generate Unique Report ID
+    const reportTimestamp = new Date();
+    const dateStr = reportTimestamp.toISOString().split('T')[0].replace(/-/g, '');
+    const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const reportId = `BUG-${dateStr}-${randomHex}`;
+
+    // 5. Prepare Email Metadata
+    const recipientEmail = process.env.BUG_REPORT_EMAIL || 'arhamahmad15900@gmail.com';
+    const reporterName = String(name || '').trim() || 'Anonymous User';
+    const reporterEmail = String(email || '').trim() || 'Not Provided';
+    const sanitizedTitle = String(title).trim();
+    const sanitizedCategory = String(category).trim();
+    const sanitizedDescription = String(description).trim();
+    const sanitizedSteps = String(stepsToReproduce || '').trim() || 'None provided';
+
+    const emailSubject = `[Access Computer Education Center] New Bug Report: ${sanitizedTitle}`;
+
+    const textBody = `
+==================================================
+NEW BUG REPORT RECEIVED
+Website: Access Computer Education Center
+Report ID: ${reportId}
+Submitted At: ${reportTimestamp.toISOString()}
+==================================================
+
+Category: ${sanitizedCategory}
+Bug Title: ${sanitizedTitle}
+Reported By: ${reporterName}
+Contact Email: ${reporterEmail}
+
+--------------------------------------------------
+DESCRIPTION:
+${sanitizedDescription}
+
+--------------------------------------------------
+STEPS TO REPRODUCE:
+${sanitizedSteps}
+
+--------------------------------------------------
+ATTACHMENTS:
+${validatedAttachments.length > 0 ? validatedAttachments.map((a, idx) => `${idx + 1}. ${a.filename} (${(a.content.length / 1024).toFixed(1)} KB)`).join('\n') : 'None'}
+==================================================
+`;
+
+    const htmlBody = `
+<div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+  <div style="background-color: #02529c; color: #ffffff; padding: 24px; text-align: center;">
+    <h1 style="margin: 0; font-size: 22px; font-weight: bold;">Access Computer Education Center</h1>
+    <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.9;">New Technical Bug Report Received</p>
+  </div>
+
+  <div style="padding: 24px; color: #333333; line-height: 1.6;">
+    <div style="background-color: #f4f6f9; border-left: 4px solid #02529c; padding: 12px 16px; margin-bottom: 20px; border-radius: 4px;">
+      <span style="font-size: 12px; font-weight: bold; color: #555555; display: block;">REPORT ID</span>
+      <span style="font-family: monospace; font-size: 18px; font-weight: bold; color: #02529c;">${reportId}</span>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #666; width: 140px;">Category:</td>
+        <td style="padding: 8px 0; font-weight: bold; color: #111;">${sanitizedCategory}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #666;">Bug Title:</td>
+        <td style="padding: 8px 0; font-weight: bold; color: #02529c;">${sanitizedTitle}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #666;">Reported By:</td>
+        <td style="padding: 8px 0; color: #111;">${reporterName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #666;">Contact Email:</td>
+        <td style="padding: 8px 0; color: #111;">${reporterEmail}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #666;">Submitted At:</td>
+        <td style="padding: 8px 0; color: #111;">${reportTimestamp.toUTCString()}</td>
+      </tr>
+    </table>
+
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: bold; color: #02529c; border-bottom: 1px solid #eeeeee; padding-bottom: 6px; margin-bottom: 8px;">DETAILED DESCRIPTION</h3>
+      <div style="background-color: #fafafa; border: 1px solid #e9e9e9; padding: 14px; border-radius: 8px; white-space: pre-wrap; font-size: 13px;">${sanitizedDescription.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: bold; color: #02529c; border-bottom: 1px solid #eeeeee; padding-bottom: 6px; margin-bottom: 8px;">STEPS TO REPRODUCE</h3>
+      <div style="background-color: #fafafa; border: 1px solid #e9e9e9; padding: 14px; border-radius: 8px; white-space: pre-wrap; font-size: 13px; font-family: monospace;">${sanitizedSteps.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+    </div>
+
+    ${validatedAttachments.length > 0 ? `
+    <div>
+      <h3 style="font-size: 14px; font-weight: bold; color: #02529c; border-bottom: 1px solid #eeeeee; padding-bottom: 6px; margin-bottom: 8px;">ATTACHMENTS (${validatedAttachments.length})</h3>
+      <ul style="padding-left: 20px; font-size: 13px; color: #2e7d32;">
+        ${validatedAttachments.map(a => `<li><strong>${a.filename}</strong> (${(a.content.length / 1024).toFixed(1)} KB) - Attached to email</li>`).join('')}
+      </ul>
+    </div>
+    ` : ''}
+  </div>
+
+  <div style="background-color: #f4f6f9; padding: 16px; text-align: center; font-size: 11px; color: #777777; border-top: 1px solid #eeeeee;">
+    Access Computer Education Center • Automatic System Notification
+  </div>
+</div>
+`;
+
+    // 6. Send Email using Nodemailer if SMTP credentials are provided
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = Number(process.env.SMTP_PORT) || 587;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    if (smtpHost && smtpUser && smtpPass) {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: process.env.SMTP_SECURE === 'true' || smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      });
+
+      await transporter.sendMail({
+        from: `"${reporterName} (via ACE Bug Reporter)" <${smtpUser}>`,
+        to: recipientEmail,
+        replyTo: reporterEmail !== 'Not Provided' ? reporterEmail : undefined,
+        subject: emailSubject,
+        text: textBody,
+        html: htmlBody,
+        attachments: validatedAttachments.map(att => ({
+          filename: att.filename,
+          content: att.content,
+          contentType: att.contentType
+        }))
+      });
+
+      console.log(`[BUG REPORT EMAIL SENT] Successfully sent report ${reportId} to ${recipientEmail} via SMTP ${smtpHost}:${smtpPort}`);
+    } else {
+      // Print clear, professional server log for dev/preview & instructions for Render environment variables
+      console.log(`
+================================================================================
+[BUG REPORT RECEIVED & LOGGED] Report ID: ${reportId}
+Recipient Email: ${recipientEmail}
+Subject: ${emailSubject}
+Category: ${sanitizedCategory}
+Title: ${sanitizedTitle}
+Reported By: ${reporterName} (${reporterEmail})
+Attachments Count: ${validatedAttachments.length}
+--------------------------------------------------------------------------------
+[RENDER DEPLOYMENT SETUP INSTRUCTION]
+To enable direct live SMTP email delivery to ${recipientEmail}, set the following
+environment variables in your Render Dashboard:
+
+  SMTP_HOST = smtp.gmail.com (or your email service provider host)
+  SMTP_PORT = 587
+  SMTP_USER = your-email@gmail.com
+  SMTP_PASS = your-app-password
+  BUG_REPORT_EMAIL = arhamahmad15900@gmail.com
+================================================================================
+      `);
+    }
+
+    return res.status(200).json({
+      success: true,
+      reportId,
+      message: 'Bug report delivered successfully.'
+    });
+
+  } catch (err: any) {
+    console.error('[BUG REPORT API ERROR]', err);
+    return res.status(500).json({
+      error: 'We couldn\'t send your bug report right now. Please check your connection and try again.'
+    });
+  }
+});
+
 // In-Memory Database for Exam Sessions
 const sessions: Map<string, ExamSession> = new Map();
 
@@ -47,6 +310,10 @@ function broadcastToSession(sessionId: string, eventName: string, data: any) {
       clients.delete(client);
     }
   }
+}
+
+function getActiveCandidateCount(session: ExamSession) {
+  return Object.values(session.candidates).filter(c => c.connected && c.connectionStatus !== 'left' && c.connectionStatus !== 'removed').length;
 }
 
 // Calculate Candidate Score
@@ -205,7 +472,7 @@ app.get('/api/sessions', (req: Request, res: Response) => {
     durationMinutes: s.durationMinutes,
     totalQuestions: s.totalQuestions,
     status: s.status,
-    candidateCount: Object.keys(s.candidates).length,
+    candidateCount: getActiveCandidateCount(s),
     resultsPublished: s.resultsPublished
   }));
   res.json({ sessions: list });
@@ -322,7 +589,7 @@ app.get('/api/sessions/:id', (req: Request, res: Response) => {
     remainingSeconds: session.remainingSeconds,
     startingCountdown: session.startingCountdown,
     broadcastNotice: session.broadcastNotice,
-    candidateCount: Object.keys(session.candidates).length
+    candidateCount: getActiveCandidateCount(session)
   });
 });
 
@@ -349,6 +616,7 @@ app.post('/api/sessions/:id/join', (req: Request, res: Response) => {
       name: cleanName,
       rollNo: cleanRoll,
       connected: true,
+      connectionStatus: 'joined',
       lastActive: Date.now(),
       warningCount: 0,
       warnings: [],
@@ -370,10 +638,11 @@ app.post('/api/sessions/:id/join', (req: Request, res: Response) => {
     broadcastToSession(session.id, 'candidate_joined', {
       rollNo: cleanRoll,
       name: cleanName,
-      totalCandidates: Object.keys(session.candidates).length
+      totalCandidates: getActiveCandidateCount(session)
     });
   } else {
     candidate.connected = true;
+    candidate.connectionStatus = 'joined';
     candidate.lastActive = Date.now();
   }
 
@@ -395,6 +664,40 @@ app.post('/api/sessions/:id/join', (req: Request, res: Response) => {
       instructions: session.instructions
     }
   });
+});
+
+// Student Leave Session Endpoint
+app.post('/api/sessions/:id/leave', (req: Request, res: Response) => {
+  const session = sessions.get(req.params.id);
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  const { rollNo } = req.body;
+  const cleanRoll = String(rollNo || '').trim().toUpperCase();
+  const candidate = session.candidates[cleanRoll];
+
+  if (candidate) {
+    candidate.connected = false;
+    candidate.connectionStatus = 'left';
+
+    session.auditLogs.unshift({
+      id: `audit-${Date.now()}-${Math.random()}`,
+      timestamp: Date.now(),
+      type: 'leave',
+      candidateName: candidate.name,
+      rollNo: cleanRoll,
+      message: `Candidate ${candidate.name} (Roll: ${cleanRoll}) left the examination session voluntarily.`
+    });
+
+    broadcastToSession(session.id, 'candidate_left', {
+      rollNo: cleanRoll,
+      name: candidate.name,
+      totalCandidates: getActiveCandidateCount(session)
+    });
+  }
+
+  res.json({ success: true });
 });
 
 // 5. Get Student Exam Paper (without correct answers)
@@ -745,6 +1048,33 @@ app.post('/api/sessions/:id/host-action', (req: Request, res: Response) => {
       });
 
       broadcastToSession(session.id, 'broadcast_notice', notice);
+      break;
+    }
+
+    case 'remove_candidate': {
+      const rollNo = String(payload?.rollNo || '').trim().toUpperCase();
+      const candidate = session.candidates[rollNo];
+      if (!candidate) {
+        return res.status(404).json({ error: 'Candidate not found in session' });
+      }
+
+      candidate.connected = false;
+      candidate.connectionStatus = 'removed';
+
+      session.auditLogs.unshift({
+        id: `audit-${Date.now()}`,
+        timestamp: now,
+        type: 'warning',
+        candidateName: candidate.name,
+        rollNo,
+        message: `❌ Host removed candidate ${candidate.name} (Roll: ${rollNo}) from the session.`
+      });
+
+      broadcastToSession(session.id, 'candidate_removed', {
+        rollNo,
+        name: candidate.name,
+        totalCandidates: getActiveCandidateCount(session)
+      });
       break;
     }
 
