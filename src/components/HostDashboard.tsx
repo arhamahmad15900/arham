@@ -24,7 +24,8 @@ import {
   Volume2,
   VolumeX,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  UserX
 } from 'lucide-react';
 
 interface HostDashboardProps {
@@ -59,6 +60,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
   const [showBroadcastModal, setShowBroadcastModal] = useState<boolean>(false);
   const [broadcastMessage, setBroadcastMessage] = useState<string>('');
   const [showCloseConfirmModal, setShowCloseConfirmModal] = useState<boolean>(false);
+  const [candidateToRemove, setCandidateToRemove] = useState<{ rollNo: string; name: string } | null>(null);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
   // New Exam Form State
@@ -364,11 +366,8 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
   const activeCandidates = candidates.filter(c => !c.submitted && c.connected).length;
   const totalWarnings = candidates.reduce((acc, c) => acc + (c.warningCount || 0), 0);
 
-  const handleRemoveCandidate = async (rollNo: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to remove ${name} (Roll No. ${rollNo}) from this examination session?`)) {
-      return;
-    }
-    await handleHostAction('remove_candidate', { rollNo });
+  const handleRemoveCandidate = (rollNo: string, name: string) => {
+    setCandidateToRemove({ rollNo, name });
   };
 
   return (
@@ -924,6 +923,60 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
           setShowCloseConfirmModal(false);
         }}
       />
+
+      {/* Remove Student Confirmation Modal */}
+      {candidateToRemove && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in">
+          <div 
+            className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-gray-200 transform transition-all"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="remove-modal-title"
+          >
+            <div className="flex items-start space-x-3 mb-4">
+              <div className="p-2.5 rounded-full bg-red-100 text-red-600 shrink-0">
+                <UserX className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 id="remove-modal-title" className="text-lg font-extrabold text-gray-900 leading-tight">
+                  Remove Student?
+                </h2>
+                <p className="text-xs text-gray-500 font-mono mt-0.5">
+                  Active Session: <strong className="text-blue-900">{sessionId}</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6 text-sm text-gray-700 leading-relaxed font-medium">
+              Are you sure you want to remove <strong className="text-gray-900">{candidateToRemove.name}</strong> (Roll No. <strong className="text-blue-900">{candidateToRemove.rollNo}</strong>) from this examination session?
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setCandidateToRemove(null)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs md:text-sm rounded-lg transition cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={actionLoading}
+                onClick={async () => {
+                  const target = candidateToRemove;
+                  setCandidateToRemove(null);
+                  await handleHostAction('remove_candidate', { rollNo: target.rollNo });
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs md:text-sm rounded-lg transition shadow-xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <UserX className="w-4 h-4" />
+                <span>Remove Student</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

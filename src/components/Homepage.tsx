@@ -1,16 +1,18 @@
 import React from 'react';
-import { MonitorCheck, GraduationCap, ArrowRight, Shield, Award, Sparkles, BookOpen, CheckCircle, FileText, Clock } from 'lucide-react';
+import { MonitorCheck, GraduationCap, ArrowRight, Shield, Award, Sparkles, BookOpen, CheckCircle, FileText, Clock, Bug } from 'lucide-react';
 
 interface HomepageProps {
   onNavigateToHost: () => void;
   onNavigateToJoin: () => void;
   onNavigateToResults: () => void;
+  onNavigateToBugReport: () => void;
 }
 
 export const Homepage: React.FC<HomepageProps> = ({
   onNavigateToHost,
   onNavigateToJoin,
-  onNavigateToResults
+  onNavigateToResults,
+  onNavigateToBugReport
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f4f7fb] to-[#eaf0f8] flex flex-col font-sans select-none">
@@ -27,6 +29,14 @@ export const Homepage: React.FC<HomepageProps> = ({
             <div className="text-xs text-blue-800 font-medium">Computer Based Test (CBT) Examination Portal • Developed by Majid Ali</div>
           </div>
         </div>
+
+        <button
+          onClick={onNavigateToBugReport}
+          className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition flex items-center space-x-1.5 shadow-2xs shrink-0 cursor-pointer"
+        >
+          <Bug className="w-4 h-4 text-amber-700" />
+          <span>Report a Bug</span>
+        </button>
       </header>
 
       {/* Hero Section */}
@@ -148,6 +158,10 @@ export const Homepage: React.FC<HomepageProps> = ({
           <div className="flex items-center space-x-4">
             <button onClick={onNavigateToHost} className="hover:text-blue-600 font-medium">Host Test</button>
             <button onClick={onNavigateToJoin} className="hover:text-blue-600 font-medium">Join Test</button>
+            <button onClick={onNavigateToBugReport} className="hover:text-amber-700 font-bold text-amber-800 flex items-center space-x-1">
+              <Bug className="w-3.5 h-3.5" />
+              <span>Report a Bug</span>
+            </button>
           </div>
         </div>
       </footer>

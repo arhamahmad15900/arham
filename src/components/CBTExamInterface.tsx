@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Question, QuestionStatus, BroadcastNotice } from '../types.ts';
 import { AlertTriangle, Clock, CheckCircle2, XCircle, Bell, ShieldAlert, Award } from 'lucide-react';
+import { StudentRemovedModal } from './StudentRemovedModal.tsx';
 
 interface CBTExamInterfaceProps {
   sessionId: string;
@@ -15,6 +16,7 @@ interface CBTExamInterfaceProps {
   examStatus: 'waiting' | 'starting' | 'live' | 'paused' | 'ended';
   broadcastNotice: BroadcastNotice | null;
   onFinalSubmitted: (data: any) => void;
+  onExitToJoin?: () => void;
 }
 
 export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
@@ -29,7 +31,8 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
   serverRemainingSeconds,
   examStatus: initialExamStatus,
   broadcastNotice: initialNotice,
-  onFinalSubmitted
+  onFinalSubmitted,
+  onExitToJoin
 }) => {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -46,6 +49,10 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
   const [tabWarningCount, setTabWarningCount] = useState<number>(0);
   const [submissionComplete, setSubmissionComplete] = useState<boolean>(false);
   const [submissionDetails, setSubmissionDetails] = useState<any>(null);
+  
+  // Real-Time Student Removal State
+  const [isRemovedByHost, setIsRemovedByHost] = useState<boolean>(false);
+  const [removalNotice, setRemovalNotice] = useState<string>('');
   
   // Mobile palette toggle
   const [showMobilePalette, setShowMobilePalette] = useState<boolean>(false);
@@ -119,6 +126,14 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
       setBroadcastNotice(data);
     });
 
+    sse.addEventListener('candidate_removed', (e) => {
+      const data = JSON.parse(e.data);
+      if (data.rollNo && data.rollNo.trim().toUpperCase() === rollNo.trim().toUpperCase()) {
+        setIsRemovedByHost(true);
+        setRemovalNotice(data.message || 'You have been removed from this examination session by the host. Your access to this session has been terminated.');
+      }
+    });
+
     return () => {
       sse.close();
     };
@@ -176,8 +191,9 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
 
   // Save Response to Server in Background
   const persistAnswerToServer = async (qId: number, optIndex: number, newStatus: QuestionStatus) => {
+    if (isRemovedByHost) return;
     try {
-      await fetch(`/api/sessions/${sessionId}/save-response`, {
+      const res = await fetch(`/api/sessions/${sessionId}/save-response`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -187,6 +203,13 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
           status: newStatus
         })
       });
+      if (res.status === 403) {
+        const data = await res.json();
+        if (data.isRemoved) {
+          setIsRemovedByHost(true);
+          setRemovalNotice(data.error || 'You have been removed from this examination session by the host. Your access to this session has been terminated.');
+        }
+      }
     } catch (err) {
       console.error('Failed to autosave response:', err);
     }
@@ -194,7 +217,7 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
 
   // Option selection
   const handleSelectOption = (optionIndex: number) => {
-    if (!currentQuestion || examStatus === 'paused') return;
+    if (!currentQuestion || examStatus === 'paused' || isRemovedByHost) return;
 
     const qId = currentQuestion.id;
     setAnswers(prev => ({ ...prev, [qId]: optionIndex }));
@@ -837,6 +860,21 @@ export const CBTExamInterface: React.FC<CBTExamInterfaceProps> = ({
           </div>
         </div>
       )}
+
+      {/* Real-Time Student Removed Modal */}
+      <StudentRemovedModal
+        isOpen={isRemovedByHost}
+        studentName={candidateName}
+        rollNo={rollNo}
+        message={removalNotice}
+        onAcknowledge={() => {
+          if (onExitToJoin) {
+            onExitToJoin();
+          } else {
+            window.location.reload();
+          }
+        }}
+      />
     </div>
   );
 };

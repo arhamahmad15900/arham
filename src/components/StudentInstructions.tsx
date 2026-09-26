@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import type { SessionPublicInfo, BroadcastNotice } from '../types.ts';
 import { Users, Clock, AlertCircle, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { StudentRemovedModal } from './StudentRemovedModal.tsx';
 
 interface StudentInstructionsProps {
   session: SessionPublicInfo;
   defaultRollNo?: string;
   defaultName?: string;
   onStartExam: (candidateName: string, rollNo: string) => void;
+  onExitToJoin?: () => void;
 }
 
 export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
   session,
   defaultRollNo = '',
   defaultName = '',
-  onStartExam
+  onStartExam,
+  onExitToJoin
 }) => {
   const [candidateName, setCandidateName] = useState(defaultName);
   const [rollNo, setRollNo] = useState(defaultRollNo);
@@ -22,10 +25,12 @@ export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
   const [startingCountdown, setStartingCountdown] = useState(session.startingCountdown || 30);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmittingJoin, setIsSubmittingJoin] = useState(false);
+  const [isRemovedByHost, setIsRemovedByHost] = useState(false);
+  const [removalMessage, setRemovalMessage] = useState('');
 
-  // SSE subscription to listen for host's 30-second start countdown and live trigger
+  // SSE subscription to listen for host actions & removal
   useEffect(() => {
-    const sse = new EventSource(`/api/sessions/${session.id}/stream`);
+    const sse = new EventSource(`/api/sessions/${session.id}/stream?rollNo=${encodeURIComponent(rollNo)}`);
 
     sse.addEventListener('session_update', (e) => {
       const data = JSON.parse(e.data);
@@ -41,15 +46,23 @@ export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
 
     sse.addEventListener('exam_started', () => {
       setSessionStatus('live');
-      if (isJoined && candidateName && rollNo) {
+      if (isJoined && candidateName && rollNo && !isRemovedByHost) {
         onStartExam(candidateName, rollNo);
+      }
+    });
+
+    sse.addEventListener('candidate_removed', (e) => {
+      const data = JSON.parse(e.data);
+      if (rollNo && data.rollNo && data.rollNo.trim().toUpperCase() === rollNo.trim().toUpperCase()) {
+        setIsRemovedByHost(true);
+        setRemovalMessage(data.message || 'You have been removed from this examination session by the host. Your access to this session has been terminated.');
       }
     });
 
     return () => {
       sse.close();
     };
-  }, [session.id, isJoined, candidateName, rollNo, onStartExam]);
+  }, [session.id, isJoined, candidateName, rollNo, onStartExam, isRemovedByHost]);
 
   // If already live and candidate joins, enter immediately
   useEffect(() => {
@@ -83,7 +96,12 @@ export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || 'Failed to join test session');
+        if (data.isRemoved || res.status === 403) {
+          setIsRemovedByHost(true);
+          setRemovalMessage(data.error || 'You have been removed from this examination session by the host. Your access to this session has been terminated.');
+        } else {
+          setErrorMsg(data.error || 'Failed to join test session');
+        }
         setIsSubmittingJoin(false);
         return;
       }
@@ -256,6 +274,21 @@ export const StudentInstructions: React.FC<StudentInstructionsProps> = ({
         </div>
 
       </div>
+
+      {/* Real-Time Student Removed Modal */}
+      <StudentRemovedModal
+        isOpen={isRemovedByHost}
+        studentName={candidateName}
+        rollNo={rollNo}
+        message={removalMessage}
+        onAcknowledge={() => {
+          if (onExitToJoin) {
+            onExitToJoin();
+          } else {
+            window.location.reload();
+          }
+        }}
+      />
     </div>
   );
 };

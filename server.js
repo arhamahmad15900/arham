@@ -629,6 +629,12 @@ app.post("/api/sessions/:id/join", (req, res) => {
   const cleanRoll = String(rollNo).trim().toUpperCase();
   const cleanName = String(name).trim();
   let candidate = session.candidates[cleanRoll];
+  if (candidate && candidate.connectionStatus === "removed") {
+    return res.status(403).json({
+      error: "You have been removed from this examination session by the host. Your access to this session has been terminated.",
+      isRemoved: true
+    });
+  }
   if (!candidate) {
     candidate = {
       id: cleanRoll,
@@ -718,6 +724,12 @@ app.get("/api/sessions/:id/student-exam", (req, res) => {
   if (!candidate) {
     return res.status(403).json({ error: "Candidate not registered in this session" });
   }
+  if (candidate.connectionStatus === "removed") {
+    return res.status(403).json({
+      error: "You have been removed from this examination session by the host. Your access to this session has been terminated.",
+      isRemoved: true
+    });
+  }
   const sanitizedQuestions = session.questions.map((q) => ({
     id: q.id,
     text: q.text,
@@ -751,6 +763,12 @@ app.post("/api/sessions/:id/save-response", (req, res) => {
   if (!candidate) {
     return res.status(404).json({ error: "Candidate not found" });
   }
+  if (candidate.connectionStatus === "removed") {
+    return res.status(403).json({
+      error: "You have been removed from this examination session by the host. Your access to this session has been terminated.",
+      isRemoved: true
+    });
+  }
   if (candidate.submitted) {
     return res.status(403).json({ error: "Test has already been submitted" });
   }
@@ -782,6 +800,12 @@ app.post("/api/sessions/:id/warning", (req, res) => {
   const candidate = session.candidates[cleanRoll];
   if (!candidate) {
     return res.status(404).json({ error: "Candidate not found" });
+  }
+  if (candidate.connectionStatus === "removed") {
+    return res.status(403).json({
+      error: "Session access terminated.",
+      isRemoved: true
+    });
   }
   candidate.warningCount += 1;
   const warningEntry = {
@@ -818,6 +842,12 @@ app.post("/api/sessions/:id/submit", (req, res) => {
   const candidate = session.candidates[cleanRoll];
   if (!candidate) {
     return res.status(404).json({ error: "Candidate not found" });
+  }
+  if (candidate.connectionStatus === "removed") {
+    return res.status(403).json({
+      error: "You have been removed from this examination session by the host. Your access to this session has been terminated.",
+      isRemoved: true
+    });
   }
   if (!candidate.submitted) {
     candidate.submitted = true;
@@ -1006,20 +1036,29 @@ app.post("/api/sessions/:id/host-action", (req, res) => {
       if (!candidate) {
         return res.status(404).json({ error: "Candidate not found in session" });
       }
+      const timeStr = new Date(now).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      if (candidate.connectionStatus === "removed") {
+        return res.json({
+          success: true,
+          message: `Candidate ${candidate.name} is already removed.`,
+          totalCandidates: getActiveCandidateCount(session)
+        });
+      }
       candidate.connected = false;
       candidate.connectionStatus = "removed";
       session.auditLogs.unshift({
-        id: `audit-${Date.now()}`,
+        id: `audit-${Date.now()}-${Math.random()}`,
         timestamp: now,
         type: "warning",
         candidateName: candidate.name,
         rollNo,
-        message: `\u274C Host removed candidate ${candidate.name} (Roll: ${rollNo}) from the session.`
+        message: `Student ${candidate.name} (Roll No. ${rollNo}) was removed by the host at ${timeStr}.`
       });
       broadcastToSession(session.id, "candidate_removed", {
         rollNo,
         name: candidate.name,
-        totalCandidates: getActiveCandidateCount(session)
+        totalCandidates: getActiveCandidateCount(session),
+        message: "You have been removed from this examination session by the host. Your access to this session has been terminated."
       });
       break;
     }
@@ -1675,6 +1714,17 @@ data: ${JSON.stringify({
     })}
 
 `);
+    if (rollNo && session.candidates[rollNo]?.connectionStatus === "removed") {
+      const c = session.candidates[rollNo];
+      res.write(`event: candidate_removed
+data: ${JSON.stringify({
+        rollNo: c.rollNo,
+        name: c.name,
+        message: "You have been removed from this examination session by the host. Your access to this session has been terminated."
+      })}
+
+`);
+    }
   }
   const heartbeat = setInterval(() => {
     try {

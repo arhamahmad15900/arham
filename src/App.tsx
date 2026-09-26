@@ -199,6 +199,11 @@ export default function App() {
         onFinalSubmitted={() => {
           // Completed state handled inside CBTExamInterface
         }}
+        onExitToJoin={() => {
+          setIsExamLive(false);
+          setActiveSessionInfo(null);
+          setCurrentMode('join');
+        }}
       />
     );
   }
@@ -314,6 +319,10 @@ export default function App() {
                   defaultRollNo={candidateRollNo}
                   defaultName={candidateName}
                   onStartExam={handleLaunchExam}
+                  onExitToJoin={() => {
+                    setActiveSessionInfo(null);
+                    setCurrentMode('join');
+                  }}
                 />
               </div>
             ) : (
