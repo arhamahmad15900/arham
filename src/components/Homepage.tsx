@@ -54,11 +54,11 @@ export const Homepage: React.FC<HomepageProps> = ({
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center px-4 py-10 sm:py-14 md:py-16 max-w-5xl mx-auto w-full">
-        {/* Editorial Eyebrow */}
-        <div className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-3 flex items-center space-x-2">
+        {/* Editorial Eyebrow (Issue 1: Removed blanket all-caps) */}
+        <div className="text-xs font-semibold text-slate-500 mb-3 flex items-center space-x-2">
           <span>Official Assessment Portal</span>
           <span aria-hidden="true" className="text-slate-300">•</span>
-          <span className="text-[#02529c]">Access Computer Education Center</span>
+          <span className="text-[#02529c] font-bold">Access Computer Education Center</span>
         </div>
 
         {/* Hero Title */}
@@ -73,7 +73,7 @@ export const Homepage: React.FC<HomepageProps> = ({
 
         {/* Primary Portals Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 w-full max-w-3xl mb-12">
-          {/* Card 1: Host Test */}
+          {/* Card 1: Host Test (Issue 4: Prominent left-aligned role badge) */}
           <div
             onClick={onNavigateToHost}
             className="bg-white rounded-lg p-6 sm:p-7 border border-slate-200 hover:border-[#02529c] shadow-xs hover:shadow-md transition-all flex flex-col cursor-pointer group"
@@ -82,7 +82,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               <div className="w-12 h-12 rounded-md bg-blue-50 text-[#02529c] flex items-center justify-center border border-blue-100">
                 <MonitorCheck className="w-6 h-6" />
               </div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#02529c] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded tracking-wide">
                 Examiner & Faculty
               </span>
             </div>
@@ -104,7 +104,7 @@ export const Homepage: React.FC<HomepageProps> = ({
             </button>
           </div>
 
-          {/* Card 2: Join Test */}
+          {/* Card 2: Join Test (Issue 4: Prominent role badge & Issue 6: Consistent 'Join Test' terminology) */}
           <div
             onClick={onNavigateToJoin}
             className="bg-white rounded-lg p-6 sm:p-7 border border-slate-200 hover:border-[#15803d] shadow-xs hover:shadow-md transition-all flex flex-col cursor-pointer group"
@@ -113,7 +113,7 @@ export const Homepage: React.FC<HomepageProps> = ({
               <div className="w-12 h-12 rounded-md bg-emerald-50 text-[#15803d] flex items-center justify-center border border-emerald-100">
                 <GraduationCap className="w-6 h-6" />
               </div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#15803d] bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded tracking-wide">
                 Candidate & Student
               </span>
             </div>
@@ -130,18 +130,17 @@ export const Homepage: React.FC<HomepageProps> = ({
               type="button"
               className="w-full py-2.5 px-4 bg-[#15803d] hover:bg-[#166534] text-white font-semibold text-xs sm:text-sm rounded-md transition flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
             >
-              <span>Enter Examination</span>
+              <span>Join Test</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
 
-
-
         {/* Platform Architecture & Features */}
         <div className="w-full max-w-4xl">
-          <div className="text-center mb-6">
-            <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider">
+          {/* Issue 2: Sentence/Title case heading & Issue 5: Tighter gap */}
+          <div className="text-center mb-4">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
               Examination Platform Capabilities
             </h3>
             <p className="text-xs text-slate-500 mt-1">
@@ -149,43 +148,44 @@ export const Homepage: React.FC<HomepageProps> = ({
             </p>
           </div>
 
+          {/* Issue 3: 12px body text, Issue 8: Larger icons, Issue 9: Balanced padding */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-              <div className="w-8 h-8 rounded-md bg-blue-50 text-[#02529c] flex items-center justify-center mb-3">
-                <Clock className="w-4 h-4" />
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-md bg-blue-50 text-[#02529c] flex items-center justify-center mb-3 border border-blue-100">
+                <Clock className="w-5 h-5" />
               </div>
-              <h4 className="text-xs font-bold text-slate-900 mb-1">Synchronized Timer</h4>
-              <p className="text-[11px] text-slate-600 leading-normal">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 mb-1.5">Synchronized Timer</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Host-controlled authoritative countdown with pause, resume, and overtime controls.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-              <div className="w-8 h-8 rounded-md bg-emerald-50 text-[#15803d] flex items-center justify-center mb-3">
-                <Layers className="w-4 h-4" />
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-md bg-emerald-50 text-[#15803d] flex items-center justify-center mb-3 border border-emerald-100">
+                <Layers className="w-5 h-5" />
               </div>
-              <h4 className="text-xs font-bold text-slate-900 mb-1">Standard Question Palette</h4>
-              <p className="text-[11px] text-slate-600 leading-normal">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 mb-1.5">Standard Question Palette</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Authentic color-coded state tracking matching NIELIT and NTA national examination portals.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-              <div className="w-8 h-8 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
-                <ShieldAlert className="w-4 h-4" />
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center mb-3 border border-amber-100">
+                <ShieldAlert className="w-5 h-5" />
               </div>
-              <h4 className="text-xs font-bold text-slate-900 mb-1">Focus & Integrity Guard</h4>
-              <p className="text-[11px] text-slate-600 leading-normal">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 mb-1.5">Focus & Integrity Guard</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Monitors window focus loss, tab switching, and keyboard shortcuts with candidate audit logging.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-              <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center mb-3">
-                <FileSpreadsheet className="w-4 h-4" />
+            <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center mb-3 border border-slate-200">
+                <FileSpreadsheet className="w-5 h-5" />
               </div>
-              <h4 className="text-xs font-bold text-slate-900 mb-1">Comprehensive PDF Reports</h4>
-              <p className="text-[11px] text-slate-600 leading-normal">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 mb-1.5">Comprehensive PDF Reports</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Instant master ranking lists, pass/fail statistics, and downloadable candidate mark sheets.
               </p>
             </div>
@@ -193,15 +193,23 @@ export const Homepage: React.FC<HomepageProps> = ({
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Footer (Issue 7: Improved button affordance & touch targets) */}
       <footer className="bg-white border-t border-slate-200 py-6 px-4 text-center text-xs text-slate-500">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© {new Date().getFullYear()} Access Computer Education Center. Developed by Majid Ali. All rights reserved.</p>
-          <div className="flex items-center space-x-5">
-            <button onClick={onNavigateToHost} className="hover:text-[#02529c] font-medium transition-colors cursor-pointer">
+          <div className="flex items-center space-x-2">
+            <button 
+              type="button"
+              onClick={onNavigateToHost} 
+              className="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 hover:text-[#02529c] hover:bg-blue-50 border border-slate-200 transition-colors cursor-pointer"
+            >
               Host Test
             </button>
-            <button onClick={onNavigateToJoin} className="hover:text-[#15803d] font-medium transition-colors cursor-pointer">
+            <button 
+              type="button"
+              onClick={onNavigateToJoin} 
+              className="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 hover:text-[#15803d] hover:bg-emerald-50 border border-slate-200 transition-colors cursor-pointer"
+            >
               Join Test
             </button>
           </div>
