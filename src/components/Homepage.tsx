@@ -8,7 +8,9 @@ import {
   Search, 
   CheckCircle2, 
   ShieldAlert,
-  Layers
+  Layers,
+  User,
+  ExternalLink
 } from 'lucide-react';
 import { Logo } from './Logo.tsx';
 
@@ -16,13 +18,25 @@ interface HomepageProps {
   onNavigateToHost: () => void;
   onNavigateToJoin: () => void;
   onNavigateToResults: () => void;
+  onNavigateToAuthor?: () => void;
+  onNavigateToArthur?: () => void;
 }
 
 export const Homepage: React.FC<HomepageProps> = ({
   onNavigateToHost,
   onNavigateToJoin,
-  onNavigateToResults
+  onNavigateToResults,
+  onNavigateToAuthor,
+  onNavigateToArthur
 }) => {
+  const handleNavAuthor = onNavigateToAuthor || onNavigateToArthur;
+  const [authorPhoto] = React.useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('author_profile_photo') || localStorage.getItem('arthur_profile_photo') || '/images/author-profile.jpg';
+    }
+    return '/images/author-profile.jpg';
+  });
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans select-none">
       {/* Top Header */}
@@ -34,13 +48,35 @@ export const Homepage: React.FC<HomepageProps> = ({
               Access Computer Education Center
             </h1>
             <div className="text-xs text-slate-500 font-medium leading-tight truncate mt-0.5">
-              Computer Based Test (CBT) Portal • Developed by Majid Ali
+              Computer Based Test (CBT) Portal • Developed by{' '}
+              {handleNavAuthor ? (
+                <button
+                  type="button"
+                  onClick={handleNavAuthor}
+                  className="font-semibold text-slate-700 hover:text-[#02529c] underline underline-offset-2 transition-colors cursor-pointer"
+                >
+                  Majid Ali (Author)
+                </button>
+              ) : (
+                'Majid Ali'
+              )}
             </div>
           </div>
         </div>
 
         {/* Header Action Nav */}
         <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+          {handleNavAuthor && (
+            <button
+              type="button"
+              onClick={handleNavAuthor}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 hover:text-[#02529c] hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Author</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onNavigateToJoin}
@@ -136,6 +172,47 @@ export const Homepage: React.FC<HomepageProps> = ({
           </div>
         </div>
 
+        {/* Author / Faculty Spotlight Banner */}
+        {handleNavAuthor && (
+          <div 
+            onClick={handleNavAuthor}
+            className="w-full max-w-4xl bg-white rounded-lg p-5 sm:p-6 border border-slate-200 hover:border-blue-300 shadow-xs hover:shadow-md transition-all cursor-pointer mb-12 flex flex-col sm:flex-row items-center justify-between gap-5 group"
+          >
+            <div className="flex items-center space-x-4 min-w-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                <img 
+                  src={authorPhoto} 
+                  alt="Majid Ali (Author)" 
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="inline-flex items-center space-x-1.5 text-[11px] font-bold text-[#02529c] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded mb-1">
+                  <span>Founder & Lead Instructor</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#02529c] transition-colors leading-tight">
+                  Majid Ali (Author)
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-1 sm:line-clamp-none">
+                  Specialist in NIELIT O-Level (M1-M4), CCC, Python & Real-Time Computer Examination Systems.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavAuthor();
+              }}
+              className="w-full sm:w-auto px-4 py-2 rounded-md text-xs font-bold text-[#02529c] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
+            >
+              <span>View Profile & Gallery</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
+
         {/* Platform Architecture & Features */}
         <div className="w-full max-w-4xl">
           {/* Issue 2: Sentence/Title case heading & Issue 5: Tighter gap */}
@@ -198,6 +275,15 @@ export const Homepage: React.FC<HomepageProps> = ({
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© {new Date().getFullYear()} Access Computer Education Center. Developed by Majid Ali. All rights reserved.</p>
           <div className="flex items-center space-x-2">
+            {handleNavAuthor && (
+              <button 
+                type="button"
+                onClick={handleNavAuthor} 
+                className="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 hover:text-[#02529c] hover:bg-blue-50 border border-slate-200 transition-colors cursor-pointer"
+              >
+                About Author
+              </button>
+            )}
             <button 
               type="button"
               onClick={onNavigateToHost} 

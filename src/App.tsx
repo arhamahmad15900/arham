@@ -7,19 +7,22 @@ import { StudentInstructions } from './components/StudentInstructions.tsx';
 import { CBTExamInterface } from './components/CBTExamInterface.tsx';
 import { StudentResultView } from './components/StudentResultView.tsx';
 import { HostExitConfirmModal } from './components/HostExitConfirmModal.tsx';
+import { AuthorDetailsPage } from './components/AuthorDetailsPage.tsx';
 import { Logo } from './components/Logo.tsx';
 import type { SessionPublicInfo, Question, QuestionStatus, ExamStatus } from './types.ts';
-import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle } from 'lucide-react';
+import { MonitorCheck, GraduationCap, Award, ArrowLeft, Home, PlusCircle, User } from 'lucide-react';
 import { generateExamReportPDF } from './utils/pdfGenerator.ts';
 
+export type NavigationMode = 'home' | 'create-exam' | 'manage-session' | 'join' | 'results' | 'author' | 'arthur';
+
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results'>('home');
+  const [currentMode, setCurrentMode] = useState<NavigationMode>('home');
   const [targetSessionId, setTargetSessionId] = useState<string>('');
   
   // Host Session Management & Exit Guard States
   const [hostSessionStatus, setHostSessionStatus] = useState<ExamStatus | null>(null);
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
-  const [pendingNavigationMode, setPendingNavigationMode] = useState<'home' | 'create-exam' | 'manage-session' | 'join' | 'results' | null>(null);
+  const [pendingNavigationMode, setPendingNavigationMode] = useState<NavigationMode | null>(null);
   const [isExitingSession, setIsExitingSession] = useState<boolean>(false);
   const [exitModalError, setExitModalError] = useState<string>('');
 
@@ -52,7 +55,7 @@ export default function App() {
   }, [currentMode, hostSessionStatus]);
 
   // Intercept Navigation to Display Exit Warning if Host Session is Active
-  const handleAttemptNavigation = (targetMode: 'home' | 'create-exam' | 'manage-session' | 'join' | 'results') => {
+  const handleAttemptNavigation = (targetMode: NavigationMode) => {
     if (currentMode === 'manage-session' && hostSessionStatus && hostSessionStatus !== 'ended') {
       if (targetMode === 'manage-session') return; // already on host dashboard
       setPendingNavigationMode(targetMode);
@@ -138,6 +141,8 @@ export default function App() {
         setCurrentMode('join');
       } else if (modeParam === 'results') {
         setCurrentMode('results');
+      } else if (modeParam === 'author' || modeParam === 'arthur' || modeParam === 'about') {
+        setCurrentMode('author');
       } else {
         // Default to Homepage at root URL "/"
         setCurrentMode('home');
@@ -217,6 +222,29 @@ export default function App() {
           onNavigateToHost={() => handleAttemptNavigation('create-exam')}
           onNavigateToJoin={() => { setActiveSessionInfo(null); handleAttemptNavigation('join'); }}
           onNavigateToResults={() => handleAttemptNavigation('results')}
+          onNavigateToAuthor={() => handleAttemptNavigation('author')}
+        />
+        <HostExitConfirmModal
+          isOpen={showExitModal}
+          sessionId={targetSessionId}
+          sessionStatus={hostSessionStatus || 'waiting'}
+          isClosing={isExitingSession}
+          errorMessage={exitModalError}
+          onCancel={handleCancelExit}
+          onConfirmClose={handleConfirmExitAndClose}
+        />
+      </>
+    );
+  }
+
+  // 2. Dedicated Author (Majid Ali) Details Page
+  if (currentMode === 'author' || currentMode === 'arthur') {
+    return (
+      <>
+        <AuthorDetailsPage
+          onBackToHome={() => handleAttemptNavigation('home')}
+          onNavigateToJoin={() => { setActiveSessionInfo(null); handleAttemptNavigation('join'); }}
+          onNavigateToHost={() => handleAttemptNavigation('create-exam')}
         />
         <HostExitConfirmModal
           isOpen={showExitModal}
@@ -255,6 +283,14 @@ export default function App() {
           >
             <Home className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Home</span>
+          </button>
+
+          <button
+            onClick={() => handleAttemptNavigation('author')}
+            className="px-2 sm:px-2.5 py-1.5 rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition flex items-center space-x-1 cursor-pointer"
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Author</span>
           </button>
 
           <button
